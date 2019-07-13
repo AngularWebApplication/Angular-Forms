@@ -13,18 +13,26 @@ import { Observable } from 'rxjs';
   styleUrls: ['./user-settings-form.component.css']
 })
 export class UserSettingsFormComponent implements OnInit {
+
+  // Maximum rating a user can provide
+  maxRating = 10;
+  // Setting field's read only attribute
+  isReadonly = false;
   // Original form field model
   originalUserSettings: UserSettings;
 
   // Copy of the original form field model
   userSettings = { ...this.originalUserSettings };
-  postError: boolean = false;
+
+  postError = false;
   postErrorMessage = ' ';
-  subscriptionTypes:Observable<string[]>;
   constructor(private dataService: DataService) { }
 
   ngOnInit() {
-    this.subscriptionTypes = this.dataService.getSubscriptionTypes();
+    this.userSettings.subscriptionTypes = this.dataService.getSubscriptionTypes();
+    this.userSettings.singleModel = 'On';
+    this.userSettings.startDate = new Date();
+    this.userSettings.startTime = new Date();
   }
 
   onBlur(field: NgModel) {
@@ -34,7 +42,7 @@ export class UserSettingsFormComponent implements OnInit {
   onHttpError(errorResponse: HttpErrorResponse): void {
     console.log('error: ', errorResponse);
     this.postError = true;
-    this.postErrorMessage = errorResponse.error.errorMessage;
+    this.postErrorMessage = errorResponse.error;
   }
 
   onSubmit(form: NgForm) {
@@ -44,9 +52,7 @@ export class UserSettingsFormComponent implements OnInit {
         result => console.log('success: ', result),
         error => this.onHttpError(error)
       );
-    }
-    else
-    {
+    } else {
       this.postError = true;
       this.postErrorMessage = 'Please fix the above erorrs';
     }
